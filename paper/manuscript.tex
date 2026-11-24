@@ -1,0 +1,250 @@
+\documentclass[a4paper,11pt]{amsart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{hyperref}
+
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\setlength{\emergencystretch}{2em}
+
+\title{The shortest rosary on seven symbols}
+\date{}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+
+\newcommand{\word}{\texttt{123456712347654321765432}}
+
+\begin{document}
+
+\begin{abstract}
+A rosary of degree $n$ is a cyclic word over $\{1,\dots,n\}$ in which every
+permutation of $\{1,\dots,n\}$ can be read as a subsequence by starting at a
+suitable bead and going once around the circle.  Gupta conjectured in 1981
+that the shortest rosary of degree $n$ has $\lfloor n^2/2\rfloor$ beads; the
+conjecture fails for $n=6$ and $n=8$, and the value for $n=7$ was open.  We
+prove that the shortest rosary of degree $7$ has $24$ beads.  The upper bound
+comes from a known construction; the lower bound is proved by an exhaustive
+computer search, based on a reduction that turns the insertion of a new
+symbol into a hitting-set problem on the gaps of a smaller rosary.
+\end{abstract}
+
+\maketitle
+
+\section{The problem and the answer}
+
+Write $[n]=\{1,\dots,n\}$.  For a word $w=w_0w_1\cdots w_{L-1}$ and
+$0\le s<L$, let $w^{(s)}=w_s w_{s+1}\cdots w_{L-1}w_0\cdots w_{s-1}$ be its
+rotation starting at position $s$.  Following Gupta \cite{Gupta1981}, a word
+$w$ over $[n]$ is a \emph{rosary of degree $n$} if every permutation of $[n]$,
+written as a word, is a subsequence of some rotation of $w$.  Equivalently,
+the letters of $w$ are beads on a circle, and each permutation can be read by
+choosing a starting bead and moving once around the circle in a fixed
+direction, skipping beads freely and never passing the starting bead again.
+Let $r(n)$ be the least length of a rosary of degree $n$.
+
+Gupta conjectured that $r(n)=\lfloor n^2/2\rfloor$ and reported that this
+was verified for $2\le n\le 6$ \cite[p.~273]{Gupta1981}; his example for
+$n=6$ has $18$ beads.  The upper-bound form $r(n)\le n^2/2$ is recorded as
+problem E22 in \cite{Guy2004}.  Lecouturier and Zmiaikou proved the upper
+bound for even $n$, exhibited rosaries of lengths $17$ for $n=6$ and $31$ for
+$n=8$ (so the exact conjecture fails for these $n$), and proved
+$r(n)<n^2/2+n/4-1$ for odd $n$, which gives $r(7)\le 25$
+\cite{LZ2012}; see also the survey \cite{EV2021}.  The values
+$r(2),\dots,r(6)=2,4,8,12,17$ are listed in \cite{A373728}.  A rosary of
+length $24$ for $n=7$, obtained by shortening the Lecouturier--Zmiaikou
+construction, was posted by Ever-Hadani \cite{EverHadani2026}, together with
+an unfinished attempt to exclude length $23$.
+
+\begin{theorem}\label{thm:main}
+$r(7)=24$.
+\end{theorem}
+
+\begin{corollary}
+Gupta's conjectured value $\lfloor n^2/2\rfloor$ is correct for $n=7$.
+\end{corollary}
+
+The upper bound is the word
+\[
+  W_{24}=\word ,
+\]
+that is, the Lecouturier--Zmiaikou word $(1\cdots7)(1\cdots5)(7\cdots1)(7\cdots2)$
+for $n=7$ \cite[Theorem~2]{LZ2012} with one bead $5$ removed.  A direct check
+of all $5040$ permutations confirms that $W_{24}$ is a rosary.  The rest of
+this note proves the lower bound.  The proof is computer assisted: the
+reduction in Section~\ref{sec:reduction} is proved by hand, and it reduces
+the lower bound to a finite search, described in Section~\ref{sec:search}.
+The same search also gives $r(6)\ge 17$, so $r(6)=17$; we found no earlier
+published proof of this lower bound.
+
+\section{The reduction}\label{sec:reduction}
+
+All words below are cyclic.  For a word $v$ of length $m$ we index its
+\emph{gaps} by $0,\dots,m-1$, gap $g$ being the position immediately before
+the bead $v_g$.
+
+\begin{lemma}[Padding]\label{lem:pad}
+Inserting a bead anywhere in a rosary of degree $n$ gives a rosary of degree
+$n$.  Consequently, if $r(n)\le L$ then there is a rosary of degree $n$ of
+length exactly $L$.
+\end{lemma}
+
+\begin{proof}
+Every rotation of the old word, starting at a bead $b$, is a subsequence of
+the rotation of the new word starting at the same bead.
+\end{proof}
+
+\begin{lemma}[Deletion]\label{lem:del}
+If $w$ is a rosary of degree $n$ and $a\in[n]$, then deleting every bead $a$
+from $w$ gives a rosary on the alphabet $[n]\setminus\{a\}$.
+\end{lemma}
+
+\begin{proof}
+Let $\pi$ be a permutation of $[n]\setminus\{a\}$.  The permutation
+$\pi a$ is a subsequence of some rotation of $w$; deleting the beads $a$
+from that rotation leaves a rotation of the shorter word that still contains
+$\pi$.
+\end{proof}
+
+\begin{lemma}[Cyclic shifts]\label{lem:shift}
+If $\pi_1\cdots\pi_n$ can be read in one lap of a cyclic word $w$, then so can
+every cyclic shift $\pi_j\cdots\pi_n\pi_1\cdots\pi_{j-1}$.
+\end{lemma}
+
+\begin{proof}
+Unroll the circle and suppose $\pi_1,\dots,\pi_n$ are read at positions
+$i_1<\dots<i_n<i_1+L$.  Then
+$i_j<\dots<i_n<i_1+L<\dots<i_{j-1}+L<i_j+L$, which reads the shift in one
+lap starting at position $i_j$.
+\end{proof}
+
+The key step describes when a new symbol can be added.  For a permutation
+$P$ of $[k]$ and a cyclic word $v$ over $[k]$ of length $m$, let
+\[
+  G_v(P)=\{\,g\in\{0,\dots,m-1\}:\ P \text{ is a subsequence of } v^{(g)}\,\}
+\]
+be the set of gaps from which $P$ can be read in one lap.
+
+\begin{lemma}[Gap criterion]\label{lem:gap}
+Let $v$ be a cyclic word over $[k]$, and let $w$ be obtained by inserting
+$c\ge1$ beads of a new symbol $x$ into gaps of $v$, occupying the set of gaps
+$S$.  Then $w$ is a rosary on $[k]\cup\{x\}$ if and only if $S\cap G_v(P)\ne
+\emptyset$ for every permutation $P$ of $[k]$.
+\end{lemma}
+
+\begin{proof}
+Every permutation of $[k]\cup\{x\}$ is a cyclic shift of exactly one word of
+the form $xP$ with $P$ a permutation of $[k]$.  By Lemma~\ref{lem:shift},
+$w$ is a rosary if and only if every word $xP$ can be read in one lap of $w$.
+If $xP$ is read with its first letter at a bead $x$ lying in gap $g$, then
+$P$ is read from the beads that follow within the lap; ignoring the other
+beads $x$, these are the beads of $v^{(g)}$ in order, so $g\in G_v(P)$.
+Conversely, if $g\in S\cap G_v(P)$, start at a bead $x$ in gap $g$ and read
+$P$ from $v^{(g)}$.
+\end{proof}
+
+\begin{lemma}[Symmetries]\label{lem:sym}
+Rotating, reversing, or relabelling a rosary gives a rosary.
+\end{lemma}
+
+\begin{proof}
+Rotation and relabelling are clear.  Reversal maps the rotations of $w$ to
+the reversed rotations of the reversed word and maps the set of all
+permutations to itself.
+\end{proof}
+
+\section{The search}\label{sec:search}
+
+By Lemma~\ref{lem:pad}, it suffices to show that no rosary of degree $7$ has
+length $23$.  Suppose $w$ is one.  Every symbol occurs, so the frequencies,
+sorted as $c_1\le\dots\le c_7$, form one of the $164$ partitions of $23$ into
+seven positive parts.  Relabel so that symbol $i$ occurs $c_i$ times.  For
+$k=1,\dots,7$ let $w_k$ be $w$ with the symbols $k+1,\dots,7$ deleted.  By
+Lemma~\ref{lem:del} each $w_k$ is a rosary of degree $k$, and by
+Lemma~\ref{lem:gap} the beads of symbol $k+1$ occupy a set of gaps of $w_k$
+meeting $G_{w_k}(P)$ for every permutation $P$ of $[k]$.
+
+For a fixed profile the search therefore builds the sets $U_1,\dots,U_7$,
+where $U_1$ is the single word $1^{c_1}$ and $U_{k+1}$ consists of all words
+obtained from some $v\in U_k$ by inserting $c_{k+1}$ beads $k+1$ whose
+occupied gaps meet every $G_v(P)$.  Words are stored in a canonical form,
+the lexicographically least spelling under rotation, reversal, and
+relabelling within classes of equal frequency; by Lemma~\ref{lem:sym} this
+loses nothing.  A child $u$ of $v$ is kept only if deleting the largest
+symbol from the canonical form of $u$ and canonicalising again returns $v$.
+This rule is complete by induction on $k$: if $u$ is any rosary at level
+$k+1$ with canonical form $c$, the canonical parent $p$ of $c$ is a rosary by
+Lemma~\ref{lem:del}, so $p\in U_k$ by induction.  Applying to $c$ the
+rotation, reversal and relabelling that carry the deleted word of $c$ to $p$
+gives a word $c'$ equivalent to $u$ that arises from $p$ by an insertion, and
+$c'$ passes the test.  Inside a level, placements are enumerated by
+branching on the smallest occupied gap of an unhit constraint; a branch is
+pruned when the number of pairwise disjoint unhit constraints exceeds the
+number of beads left.  At the last level only the existence of a placement
+is needed.
+
+The search terminates with $U_7=\emptyset$ for all $164$ profiles.  The
+numbers of distinct words, up to symmetry, reached at each level over all
+profiles are shown below.
+
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+level $k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
+\midrule
+words in $U_k$ & 3 & 10 & 88 & 3122 & 125334 & 145472 & 0\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Hence no rosary of degree $7$ has $23$ beads, and with $W_{24}$ this proves
+Theorem~\ref{thm:main}.  For $n=6$ the same program finds no rosary of length
+$16$ among the $35$ profiles and finds rosaries of length $17$, so $r(6)=17$.
+
+\section{Verification}
+
+The search is load-bearing, so it was carried out several times.  The
+original program and a second implementation of the same method both report
+$U_7=\emptyset$, with the level counts above.  Three further programs were
+written independently of these.  One inserts a most frequent symbol at each
+level and keeps a single set of canonical words under the full symmetry
+group; it reports the same level counts and, as a positive control, finds
+rosaries of length $24$.  A second deletes a most frequent symbol and checks
+every candidate directly against all permutations; it finds no rosary of
+length $23$ and exactly $24$ classes of rosaries of length $17$ for $n=6$.
+A third tests each accepted child directly, with no pruning, and also finds
+none.  For $n\le5$ these programs agree with a brute-force check of all
+words of the relevant lengths, including all $5^{13}$ words of length $13$,
+and a SAT solver confirms that no rosary of degree $6$ has length $16$.
+Deliberately introduced errors in the pruning and in the one-lap test were
+detected by these comparisons.  The programs, their outputs, and
+instructions for rerunning them are available at
+\url{https://github.com/DannyExperiments/seven-symbol-rosary}.
+
+All programs rely on Lemmas~\ref{lem:pad}--\ref{lem:sym}, except the brute
+force and SAT checks for $n\le6$.  No part of the argument has been
+formally verified.
+
+\begin{remark}
+Lemma~\ref{lem:del} is the circular form of a deletion argument used for
+linear words by Newey \cite{Newey1973}, and Lemma~\ref{lem:gap} is a circular
+analogue of a one-letter characterisation of Radomirovi\'c
+\cite[Theorem~5]{Radomirovic2012}.  The canonical-parent rule is a form of
+canonical augmentation \cite{McKay1998}.
+\end{remark}
+
+\section*{AI disclosure}
+Under human direction, an OpenAI Codex cloud agent found the proof and wrote
+the first two search programs, and Claude (Anthropic) independently audited
+and reimplemented the search, carried out the literature review, and prepared
+this manuscript.  Neither system is listed as an author.  The work has been
+internally reviewed, not peer reviewed.
+
+\renewcommand{\bibliofont}{\footnotesize\raggedright}
+\bibliographystyle{amsplain}
+\bibliography{references}
+\end{document}

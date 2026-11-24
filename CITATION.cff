@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this research release, cite it using the metadata below."
+title: "The shortest rosary on seven symbols"
+type: software
+version: 1.0.0
+repository-code: "https://github.com/DannyExperiments/seven-symbol-rosary"
+authors:
+  - name: "DannyExperiments"
+preferred-citation:
+  type: article
+  title: "The shortest rosary on seven symbols"
+  authors:
+    - name: "DannyExperiments"
+  year: 2026
+  version: 1.0.0
+keywords:
+  - rosary
+  - permutations
+  - circular supersequence
+  - Gupta's conjecture
+  - OEIS A373728
+  - computer-assisted proof

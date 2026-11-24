@@ -1,0 +1,12 @@
+n=6 L=17 exists=1 witness=24365643216534651
+level parents accepted_insertions distinct_children
+1 2 0 0
+2 4 4 4
+3 25 53 25
+4 191 531 191
+5 277 472 277
+6 0 1 0
+
+real	0m0.017s
+user	0m0.014s
+sys	0m0.000s

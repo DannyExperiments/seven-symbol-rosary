@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seven-symbol rosary explorer</title>
+<style>
+  :root { --bg:#fbfaf7; --ink:#1d1d1f; --muted:#6b6b70; --line:#d9d6cf; --accent:#2f5d8a; --ok:#2e7d4f; --bad:#b3412f; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font: 15px/1.5 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  header { padding:18px 24px 6px; max-width:1180px; margin:0 auto; }
+  h1 { font-size:21px; margin:0 0 4px; font-weight:600; }
+  header p { margin:0; color:var(--muted); max-width:860px; }
+  main { display:grid; grid-template-columns: minmax(0,1fr) 340px; gap:18px; padding:10px 24px 24px; max-width:1180px; margin:0 auto; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .stage { position:relative; background:#fff; border:1px solid var(--line); border-radius:10px; min-height:520px; }
+  canvas { width:100%; height:560px; display:block; cursor:grab; touch-action:none; }
+  canvas:active { cursor:grabbing; }
+  .hint { position:absolute; left:12px; bottom:10px; font-size:12px; color:var(--muted); }
+  aside { display:flex; flex-direction:column; gap:12px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card h2 { font-size:14px; margin:0 0 6px; font-weight:600; }
+  label { font-size:13px; color:var(--muted); display:block; margin-bottom:4px; }
+  select, input[type=text] { width:100%; font:inherit; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:#fff; }
+  .row { display:flex; gap:8px; margin-top:8px; }
+  button { font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--line); border-radius:6px; background:#f4f2ee; cursor:pointer; }
+  button:hover { background:#ebe8e2; }
+  .status { font-size:13.5px; }
+  .ok { color:var(--ok); } .bad { color:var(--bad); }
+  .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size:13px; letter-spacing:.5px; word-break:break-all; }
+  .small { font-size:12.5px; color:var(--muted); }
+  .scene-only { display:none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Seven symbols, 24 beads</h1>
+  <p>Can every ordering of 1&ndash;7 be read from beads on a circle, going once clockwise and skipping beads freely? This circle of 24 beads does it, and no circle of 23 beads can. Drag to rotate.</p>
+</header>
+<main>
+  <div class="stage">
+    <canvas id="cv" aria-label="Interactive 3D rosary"></canvas>
+    <div class="hint" id="hint">Drag to rotate &middot; click a bead to remove or restore it</div>
+  </div>
+  <aside>
+    <div class="card">
+      <label for="scene">Scene</label>
+      <select id="scene">
+        <option value="read">1. Read any ordering in one lap</option>
+        <option value="insert">2. Adding a symbol = covering gaps</option>
+      </select>
+    </div>
+
+    <div class="card scene-only" data-scene="read">
+      <h2>Pick an ordering of 1&ndash;7</h2>
+      <input type="text" id="perm" value="7351246" maxlength="7" spellcheck="false" aria-label="Ordering">
+      <div class="row"><button id="rand">Random ordering</button><button id="hard">Find a failing one</button><button id="reset">Restore all beads</button></div>
+      <p class="status" id="readStatus"></p>
+      <p class="small">The rising path is the reading route. It starts at one bead and climbs as it goes clockwise; it never completes a full turn, so no bead is used twice. Click a bead to remove it and see that every one of the 24 beads is needed.</p>
+    </div>
+
+    <div class="card scene-only" data-scene="insert">
+      <h2>Insert symbol 7 into a 6-symbol circle</h2>
+      <label for="perm6">Ordering P of 1&ndash;6</label>
+      <input type="text" id="perm6" value="642153" maxlength="6" spellcheck="false" aria-label="Ordering of 1 to 6">
+      <div class="row"><button id="rand6">Random P</button><button id="reset6">Original 7s</button></div>
+      <p class="status" id="insStatus"></p>
+      <p class="small">Delete the three 7s and 21 beads remain. Green gaps are those from which P can be read in one lap. Reading &ldquo;7, then P&rdquo; works exactly when a 7 sits in a green gap, and every ordering of 1&ndash;7 is a rotation of some &ldquo;7, then P&rdquo;. So the 7s must touch the green gaps of all 720 orderings P. Click gaps to move the 7s and watch the count.</p>
+    </div>
+
+    <div class="card">
+      <h2>The circle</h2>
+      <div class="mono" id="wordline"></div>
+      <p class="small" style="margin-bottom:0">This figure illustrates the 24-bead circle and the insertion step. The proof that 23 beads never suffice is an exhaustive computer search over all 164 ways to split 23 beads among seven symbols; see the paper.</p>
+    </div>
+  </aside>
+</main>
+<script>
+(function(){
+"use strict";
+const WORD = "123456712347654321765432";
+const COLORS = ["#2f5d8a","#c0662b","#7d5ba6","#b8962e","#2d8b94","#8c5a3c","#b3412f"];
+const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+let W=0,H=0,DPR=1;
+function resize(){ DPR=window.devicePixelRatio||1; const r=cv.getBoundingClientRect(); W=r.width; H=r.height; cv.width=W*DPR; cv.height=H*DPR; ctx.setTransform(DPR,0,0,DPR,0,0); draw(); }
+
+// ---------- combinatorics ----------
+function readOneLap(word, perm){ // returns {start, picks} or null; word: array of symbols, perm: array
+  const L=word.length;
+  for(let s=0;s<L;s++){
+    if(word[s]!==perm[0]) continue;
+    const picks=[s]; let k=1;
+    for(let d=1; d<L && k<perm.length; d++){ const i=(s+d)%L; if(word[i]===perm[k]){ picks.push(s+d); k++; } }
+    if(k===perm.length) return {start:s, picks};
+  }
+  return null;
+}
+function perms(arr){ const out=[]; const a=arr.slice(); const c=new Array(a.length).fill(0); out.push(a.slice()); let i=0; while(i<a.length){ if(c[i]<i){ const j=i%2?c[i]:0; [a[j],a[i]]=[a[i],a[j]]; out.push(a.slice()); c[i]++; i=0;} else { c[i]=0; i++; } } return out; }
+const P7 = perms([1,2,3,4,5,6,7]), P6 = perms([1,2,3,4,5,6]);
+
+// ---------- state ----------
+let scene="read";
+let removed = new Set();        // indices of WORD removed (scene 1)
+let perm = [7,3,5,1,2,4,6];
+const baseIdx=[], base=[]; const orig7Gaps=new Set();
+{ let g=0; for(let i=0;i<WORD.length;i++){ if(WORD[i]==="7"){ orig7Gaps.add(base.length%21); } else { base.push(+WORD[i]); baseIdx.push(i); } } }
+// gap g = immediately before base bead g (gap 0 = between last and first)
+let sevens = new Set(orig7Gaps);
+let perm6=[6,4,2,1,5,3];
+
+function currentWord(){ const w=[], idx=[]; for(let i=0;i<WORD.length;i++){ if(!removed.has(i)){ w.push(+WORD[i]); idx.push(i);} } return {w, idx}; }
+function gapsFor(P){ const L=base.length, G=new Set(); for(let g=0; g<L; g++){ let k=0; for(let d=0; d<L && k<P.length; d++){ if(base[(g+d)%L]===P[k]) k++; } if(k===P.length) G.add(g); } return G; }
+const G6 = P6.map(p=>({p, G:gapsFor(p)}));
+
+// ---------- 3D ----------
+let yaw=0.35, pitch=0.55, dragging=false, lx=0, ly=0, moved=0;
+function rot(p){ const [x,y,z]=p; const cy=Math.cos(yaw), sy=Math.sin(yaw); let X=x*cy+z*sy, Z=-x*sy+z*cy; const cp=Math.cos(pitch), sp=Math.sin(pitch); let Y=y*cp-Z*sp; Z=y*sp+Z*cp; return [X,Y,Z]; }
+function proj(p){ const [X,Y,Z]=rot(p); const f=3.2/(3.2+Z*0.35); const s=Math.min(W,H)*0.40; return {x:W/2+X*s*f, y:H/2+Y*s*f+20, z:Z, f}; }
+function ringPos(i,L,h=0){ const t=-Math.PI/2 + 2*Math.PI*i/L; return [Math.cos(t), -h, Math.sin(t)]; }
+
+let hitList=[];
+function draw(){
+  if(!W) return;
+  ctx.clearRect(0,0,W,H);
+  hitList=[];
+  if(scene==="read") drawRead(); else drawInsert();
+}
+function circleRing(L){ ctx.strokeStyle="#e3e0d9"; ctx.lineWidth=1.2; ctx.beginPath(); for(let k=0;k<=120;k++){ const p=proj(ringPos(k*L/120,L)); k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y);} ctx.stroke(); }
+function bead(p, color, label, r, alpha=1, ring=null){ ctx.globalAlpha=alpha; ctx.beginPath(); ctx.arc(p.x,p.y,r*p.f,0,7); ctx.fillStyle=color; ctx.fill(); if(ring){ ctx.lineWidth=2.5; ctx.strokeStyle=ring; ctx.stroke(); } ctx.fillStyle="#fff"; ctx.font=`600 ${Math.round(12*p.f)}px -apple-system,Helvetica,Arial`; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(label,p.x,p.y+0.5); ctx.globalAlpha=1; }
+
+function drawRead(){
+  const L=WORD.length; circleRing(L);
+  const {w, idx}=currentWord();
+  const res = w.length ? readOneLap(w, perm) : null;
+  // path: helix rising one unit per lap, from start through picks
+  const picksOrig = new Set();
+  if(res){
+    const Lw=w.length; const s=res.start; const last=res.picks[res.picks.length-1];
+    const angleOf = j => idx[j % Lw] + (j>=Lw ? L : 0); // position along original ring (in bead units), unwrapped
+    const a0=angleOf(s), a1=angleOf(last) < a0 ? angleOf(last)+L : angleOf(last);
+    const span=a1-a0; const H0=0.15, rise=0.55;
+    ctx.lineWidth=3; ctx.strokeStyle="rgba(47,93,138,.85)"; ctx.beginPath();
+    for(let k=0;k<=200;k++){ const a=a0+span*k/200; const h=H0+rise*(a-a0)/L; const p=proj(ringPos(a,L,h)); k?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y); }
+    ctx.stroke();
+    res.picks.forEach((j,n)=>{ let a=angleOf(j); if(a<a0) a+=L; const h=H0+rise*(a-a0)/L; const top=proj(ringPos(a,L,h)), bot=proj(ringPos(a,L,0)); ctx.strokeStyle="rgba(47,93,138,.5)"; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(top.x,top.y); ctx.lineTo(bot.x,bot.y); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle="#8a8a90"; ctx.font="11px -apple-system,Helvetica,Arial"; ctx.textAlign="center"; ctx.fillText(String(n+1), top.x, top.y-9); picksOrig.add(idx[j % Lw]); });
+  }
+  const order=[...Array(L).keys()].map(i=>({i,p:proj(ringPos(i,L))})).sort((a,b)=>b.p.z-a.p.z);
+  for(const {i,p} of order){
+    const sym=+WORD[i];
+    if(removed.has(i)){ ctx.globalAlpha=.35; ctx.beginPath(); ctx.arc(p.x,p.y,9*p.f,0,7); ctx.strokeStyle="#999"; ctx.setLineDash([2,2]); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1; }
+    else bead(p, COLORS[sym-1], String(sym), 13, picksOrig.size && !picksOrig.has(i) ? .45 : 1, picksOrig.has(i)?"#1d1d1f":null);
+    hitList.push({i,x:p.x,y:p.y,r:14*p.f});
+  }
+  const st=document.getElementById("readStatus");
+  const permS=perm.join("");
+  if(res){ st.innerHTML=`<span class="ok">Found.</span> Start at bead ${idx[res.start]+1} and read clockwise: ${permS} uses beads ${res.picks.map(j=>idx[j%w.length]+1).join(", ")}.`; }
+  else { st.innerHTML=`<span class="bad">Not readable.</span> With ${w.length} beads, ${permS} cannot be read in one clockwise lap.`; }
+  const fails = removed.size ? P7.filter(p=>!readOneLap(w,p)).length : 0;
+  if(removed.size) st.innerHTML += `<br>${fails} of 5040 orderings fail with ${removed.size} bead${removed.size>1?"s":""} removed.`;
+  document.getElementById("wordline").textContent = WORD.split("").map((c,i)=>removed.has(i)?"·":c).join(" ");
+}
+
+function drawInsert(){
+  const L=base.length; circleRing(L);
+  const G = gapsFor(perm6);
+  // gaps as arcs between beads
+  for(let g=0; g<L; g++){
+    const a=g-0.5; const p=proj(ringPos(a,L)); const inG=G.has(g);
+    ctx.beginPath(); ctx.arc(p.x,p.y,7*p.f,0,7); ctx.fillStyle= inG ? "#22a052" : "rgba(160,160,160,.35)"; ctx.fill();
+    hitList.push({gap:g,x:p.x,y:p.y,r:10*p.f});
+  }
+  const order=[...Array(L).keys()].map(i=>({i,p:proj(ringPos(i,L))})).sort((a,b)=>b.p.z-a.p.z);
+  for(const {i,p} of order) bead(p, COLORS[base[i]-1], String(base[i]), 12);
+  for(const g of [...sevens].sort((a,b)=>proj(ringPos(b-0.5,L)).z-proj(ringPos(a-0.5,L)).z)){
+    const a=g-0.5, p=proj(ringPos(a,L)), q=proj(ringPos(a,L,0.45)), inG=G.has(g);
+    ctx.strokeStyle=COLORS[6]; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y); ctx.stroke();
+    bead(q, COLORS[6], "7", 13, 1, inG?"#22a052":null); hitList.push({gap:g,x:q.x,y:q.y,r:14*q.f});
+  }
+  const unhit = G6.filter(o=>![...sevens].some(g=>o.G.has(g)));
+  const hit = [...sevens].some(g=>G.has(g));
+  const st=document.getElementById("insStatus");
+  st.innerHTML = `P = ${perm6.join("")}: ${G.size} green gaps. ` + (hit?`<span class="ok">A 7 sits in one</span>, so 7${perm6.join("")} reads in one lap.`:`<span class="bad">No 7 sits in one</span>, so 7${perm6.join("")} cannot be read.`)
+    + `<br>With 7s in ${sevens.size} gap${sevens.size===1?"":"s"}: ` + (unhit.length? `<span class="bad">${unhit.length} of 720</span> orderings P are missed (e.g. ${unhit[0].p.join("")}).` : `<span class="ok">all 720</span> orderings P are covered, so the circle works for 1&ndash;7.`);
+  const L24=[]; { const gl=[...sevens]; for(let g=0; g<L; g++){ if(sevens.has(g)) L24.push(7); L24.push(base[g]); } }
+  document.getElementById("wordline").textContent = L24.join(" ") + `   (${L24.length} beads)`;
+}
+
+// ---------- interaction ----------
+function parsePerm(s,n){ const d=s.replace(/[^1-9]/g,"").split("").map(Number); if(d.length!==n) return null; const set=new Set(d); for(let k=1;k<=n;k++) if(!set.has(k)) return null; return d; }
+document.getElementById("perm").addEventListener("input",e=>{ const p=parsePerm(e.target.value,7); if(p){ perm=p; draw(); } });
+document.getElementById("perm6").addEventListener("input",e=>{ const p=parsePerm(e.target.value,6); if(p){ perm6=p; draw(); } });
+document.getElementById("rand").onclick=()=>{ perm=P7[Math.floor(Math.random()*P7.length)].slice(); document.getElementById("perm").value=perm.join(""); draw(); };
+document.getElementById("rand6").onclick=()=>{ perm6=P6[Math.floor(Math.random()*P6.length)].slice(); document.getElementById("perm6").value=perm6.join(""); draw(); };
+document.getElementById("reset").onclick=()=>{ removed.clear(); draw(); };
+document.getElementById("reset6").onclick=()=>{ sevens=new Set(orig7Gaps); draw(); };
+document.getElementById("hard").onclick=()=>{ const {w}=currentWord(); const f=P7.find(p=>!readOneLap(w,p)); if(f){ perm=f.slice(); document.getElementById("perm").value=perm.join(""); } else { document.getElementById("readStatus").innerHTML='<span class="ok">Every ordering is readable.</span> Remove a bead first.'; return; } draw(); };
+document.getElementById("scene").onchange=e=>{ scene=e.target.value; document.querySelectorAll(".scene-only").forEach(el=>el.style.display= el.dataset.scene===scene?"block":"none"); document.getElementById("hint").textContent = scene==="read" ? "Drag to rotate · click a bead to remove or restore it" : "Drag to rotate · click a gap to add or remove a 7"; draw(); };
+cv.addEventListener("pointerdown",e=>{ dragging=true; moved=0; lx=e.clientX; ly=e.clientY; cv.setPointerCapture(e.pointerId); });
+cv.addEventListener("pointermove",e=>{ if(!dragging) return; const dx=e.clientX-lx, dy=e.clientY-ly; moved+=Math.abs(dx)+Math.abs(dy); yaw+=dx*0.008; pitch=Math.max(-1.3,Math.min(1.45,pitch+dy*0.008)); lx=e.clientX; ly=e.clientY; draw(); });
+cv.addEventListener("pointerup",e=>{ dragging=false; if(moved>4) return; const r=cv.getBoundingClientRect(); const x=e.clientX-r.left, y=e.clientY-r.top; let best=null; for(const h of hitList){ const d=Math.hypot(h.x-x,h.y-y); if(d<h.r && (!best||d<best.d)) best={...h,d}; } if(!best) return; if(scene==="read" && best.i!==undefined){ removed.has(best.i)?removed.delete(best.i):removed.add(best.i); } else if(scene==="insert" && best.gap!==undefined){ sevens.has(best.gap)?sevens.delete(best.gap):sevens.add(best.gap); } draw(); });
+let auto=true; cv.addEventListener("pointerdown",()=>auto=false,{once:true});
+function tick(){ if(auto){ yaw+=0.003; draw(); } requestAnimationFrame(tick); }
+window.addEventListener("resize",resize);
+document.getElementById("scene").dispatchEvent(new Event("change"));
+resize(); tick();
+})();
+</script>
+</body>
+</html>

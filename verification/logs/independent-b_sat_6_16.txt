@@ -1,0 +1,2 @@
+n=6 L=16: 69313 vars, 279259 clauses, built 0.2s
+UNSAT (184.0s)

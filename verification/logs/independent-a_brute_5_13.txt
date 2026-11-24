@@ -1,0 +1,5 @@
+BRUTE n=5 L=13 strings=1220703125 rosaries=1513200 naive_mismatch_on_sampled_hits=0 first=1121345121543
+
+real	15m20.518s
+user	6m21.059s
+sys	0m0.089s

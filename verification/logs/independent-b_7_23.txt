@@ -1,0 +1,4 @@
+sanity n=6 OEIS example covers: 1
+sanity n=7 Danny 24 covers: 1
+sanity n=7 Danny 24 minus last bead covers (expect 0): 0
+n=7 L=23: 0 rosary classes found; candidates checked 1505419225; 504.5s
