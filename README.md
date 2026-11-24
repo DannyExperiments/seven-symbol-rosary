@@ -1,5 +1,7 @@
 # The shortest rosary on seven symbols
 
+No Lean badge is shown: no scope-matched theorem is kernel checked.
+
 **Answer: 24 beads.** The shortest circle of beads from which every ordering of seven symbols can be read, going once clockwise and skipping beads freely, has 24 beads. In the notation of [OEIS A373728](https://oeis.org/A373728), $r(7)=24$.
 
 [Paper (PDF)](paper/manuscript.pdf) ·
@@ -7,6 +9,7 @@
 [Problem and proof](proof/PROBLEM_AND_PROOF.md) ·
 [Mathematical audit](audits/public_safe_reports/MATHEMATICAL_AUDIT.md) ·
 [Literature and priority audit](audits/public_safe_reports/LITERATURE_PRIORITY_AUDIT_2026-11-25.md) ·
+[Scope and limitations](CLAIM_SCOPE_AND_LIMITATIONS.md) ·
 [Reproduce](REPRODUCIBILITY.md) ·
 [3D explorer](visualization/README.md) ·
 [Citation](CITATION.cff)
@@ -33,7 +36,7 @@ The [interactive explorer](visualization/README.md) shows the 24-bead circle. Pi
 
 Download [`visualization/seven-symbol-rosary-explorer.zip`](visualization/seven-symbol-rosary-explorer.zip), unzip it, and open the HTML file in a browser. It runs offline and uses no external libraries.
 
-![Rotating 24-bead rosary with a reading path](visualization/rosary.gif)
+[![Rotating 24-bead rosary. The reading path for an ordering of 1-7 climbs once around the circle without passing its starting bead.](visualization/rosary.gif)](https://github.com/DannyExperiments/seven-symbol-rosary/raw/refs/heads/main/visualization/seven-symbol-rosary-explorer.zip)
 
 ## Verification status
 
@@ -44,7 +47,7 @@ Download [`visualization/seven-symbol-rosary-explorer.zip`](visualization/seven-
 | Small-case calibration | Brute force over all words for $n\le5$ (up to $5^{13}$ words) and SAT for $n=6$, $L=16$ agree with the search |
 | Mathematical audit | Three independent AI audits (hostile, reconstruction, code and scope): all pass, no invalid step found |
 | Literature and priority | Three search lanes through 2026-11-25. The lower bound appears to be new after a documented search; the 24-bead upper bound was posted earlier and is credited |
-| Formal verification | None. No Lean badge is shown: no theorem has been kernel-checked |
+| Formal verification | None |
 | Peer review | Not peer reviewed |
 
 ## Citation
