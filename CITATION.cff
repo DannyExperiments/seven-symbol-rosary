@@ -5,6 +5,18 @@ type: software
 version: 1.0.0
 date-released: 2026-11-25
 repository-code: "https://github.com/DannyExperiments/seven-symbol-rosary"
+doi: "10.5281/zenodo.24518488"
+url: "https://doi.org/10.5281/zenodo.24518488"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24518488"
+    description: "The version DOI for the immutable Version 1.0.0 release."
+  - type: doi
+    value: "10.5281/zenodo.24518487"
+    description: "The concept DOI for all versions of this work."
+  - type: url
+    value: "https://github.com/DannyExperiments/seven-symbol-rosary/releases/tag/v1.0.0"
+    description: "The immutable GitHub Version 1.0.0 release."
 authors:
   - name: "DannyExperiments"
 preferred-citation:
@@ -14,6 +26,8 @@ preferred-citation:
     - name: "DannyExperiments"
   year: 2026
   version: 1.0.0
+  doi: "10.5281/zenodo.24518488"
+  url: "https://doi.org/10.5281/zenodo.24518488"
 keywords:
   - rosary
   - permutations

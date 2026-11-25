@@ -4,6 +4,7 @@
 [![Replay exhaustive search](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/replay.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/replay.yml)
 [![PDF build](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/pdf.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/pdf.yml)
 [![Partial Lean verification](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/lean.yml)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24518488.svg)](https://doi.org/10.5281/zenodo.24518488)
 
 The Lean badge covers the upper bound only; the lower bound is not formalized.
 
@@ -57,7 +58,7 @@ Download [`visualization/seven-symbol-rosary-explorer.zip`](visualization/seven-
 
 ## Citation
 
-See [`CITATION.cff`](CITATION.cff). A DOI will be added after release.
+Version 1.0.0 is archived at Zenodo: version DOI [10.5281/zenodo.24518488](https://doi.org/10.5281/zenodo.24518488), concept DOI for all versions [10.5281/zenodo.24518487](https://doi.org/10.5281/zenodo.24518487). The immutable GitHub release is [v1.0.0](https://github.com/DannyExperiments/seven-symbol-rosary/releases/tag/v1.0.0). See [`CITATION.cff`](CITATION.cff).
 
 ## Authorship and AI disclosure
 
