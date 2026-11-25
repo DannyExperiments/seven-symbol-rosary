@@ -1,0 +1,6 @@
+name = "seven-symbol-rosary"
+version = "0.1.0"
+defaultTargets = ["SevenSymbolRosary"]
+
+[[lean_lib]]
+name = "SevenSymbolRosary"

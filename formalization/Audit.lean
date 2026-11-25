@@ -1,0 +1,5 @@
+import SevenSymbolRosary
+
+#print axioms SevenSymbolRosary.orderings_complete
+#print axioms SevenSymbolRosary.all_orderings_readable
+#print axioms SevenSymbolRosary.witness_is_rosary
