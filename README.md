@@ -1,5 +1,12 @@
 # The shortest rosary on seven symbols
 
+[![Verify public candidate](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/verify.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/verify.yml)
+[![Replay exhaustive search](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/replay.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/replay.yml)
+[![PDF build](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/pdf.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/pdf.yml)
+[![Partial Lean verification](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/lean.yml/badge.svg?branch=main)](https://github.com/DannyExperiments/seven-symbol-rosary/actions/workflows/lean.yml)
+
+The Lean badge covers the upper bound only; the lower bound is not formalized.
+
 **Answer: 24 beads.** The shortest circle of beads from which every ordering of seven symbols can be read, going once clockwise and skipping beads freely, has 24 beads. In the notation of [OEIS A373728](https://oeis.org/A373728), $r(7)=24$.
 
 [Paper (PDF)](paper/manuscript.pdf) ·
