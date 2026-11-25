@@ -8,3 +8,5 @@
 | `src/independent-b/` | Claude | Delete a most frequent symbol with frequency caps; direct coverage test of every candidate; SAT encoding without any reduction | none (0 classes, 1.5e9 candidates) |
 
 Small cases: `independent-a brute` and `independent-b brute` enumerate every word for $n\le5$ and match the searches exactly (e.g. 29400 rosary strings at $n=5$, $L=12$; none at $L=11$). `independent-b/sat.py 6 16` is UNSAT. Logs: `logs/`.
+
+Upper bound in Lean 4: `../formalization/` (kernel checked; standard axioms only).

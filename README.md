@@ -1,7 +1,5 @@
 # The shortest rosary on seven symbols
 
-No Lean badge is shown: no scope-matched theorem is kernel checked.
-
 **Answer: 24 beads.** The shortest circle of beads from which every ordering of seven symbols can be read, going once clockwise and skipping beads freely, has 24 beads. In the notation of [OEIS A373728](https://oeis.org/A373728), $r(7)=24$.
 
 [Paper (PDF)](paper/manuscript.pdf) ·
@@ -47,7 +45,7 @@ Download [`visualization/seven-symbol-rosary-explorer.zip`](visualization/seven-
 | Small-case calibration | Brute force over all words for $n\le5$ (up to $5^{13}$ words) and SAT for $n=6$, $L=16$ agree with the search |
 | Mathematical audit | Three independent AI audits (hostile, reconstruction, code and scope): all pass, no invalid step found |
 | Literature and priority | Three search lanes through 2026-11-25. The lower bound appears to be new after a documented search; the 24-bead upper bound was posted earlier and is credited |
-| Formal verification | None |
+| Formal verification | Partial: the upper bound is kernel checked in Lean 4 ([`formalization/`](formalization/README.md)). The lower bound is not formalized |
 | Peer review | Not peer reviewed |
 
 ## Citation

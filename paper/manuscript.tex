@@ -226,8 +226,9 @@ instructions for rerunning them are available at
 \url{https://github.com/DannyExperiments/seven-symbol-rosary}.
 
 All programs rely on Lemmas~\ref{lem:pad}--\ref{lem:sym}, except the brute
-force and SAT checks for $n\le6$.  No part of the argument has been
-formally verified.
+force and SAT checks for $n\le6$.  The upper bound has also been checked in
+Lean~4 by kernel evaluation over all $5040$ permutations; the lower bound has
+not been formally verified.
 
 \begin{remark}
 Lemma~\ref{lem:del} is the circular form of a deletion argument used for

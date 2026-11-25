@@ -3,6 +3,7 @@
 | Claim | Evidence | Load-bearing |
 |---|---|---|
 | `123456712347654321765432` is a rosary of degree 7 | Direct check of 5040 permutations (`scripts/replay.py`, `original/check_witness.py`, `independent-a` naive mode) | Yes |
+| Same, kernel checked | Lean 4 `SevenSymbolRosary.witness_is_rosary` (`formalization/verify.sh`) | Corroborating |
 | Padding, deletion, cyclic-shift, gap and symmetry lemmas | Hand proofs, paper §2; re-derived in all three audits | Yes |
 | No rosary of degree 7 has 23 beads | Exhaustive search, `original/` over 164 profiles (`verification/logs/original_7_23.txt`) | Yes |
 | Same | `second/`, `independent-a/`, `independent-b/` (logs in `verification/logs/`) | Corroborating |
