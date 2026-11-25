@@ -3,6 +3,7 @@ message: "If you use this research release, cite it using the metadata below."
 title: "The shortest rosary on seven symbols"
 type: software
 version: 1.0.0
+date-released: 2026-11-25
 repository-code: "https://github.com/DannyExperiments/seven-symbol-rosary"
 authors:
   - name: "DannyExperiments"
